@@ -5,194 +5,165 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Parashar Home Switch Control</title>
   <style>
+    * { box-sizing: border-box; }
     body {
-      font-family: Arial, sans-serif;
-      background: #f4f4f4;
       margin: 0;
-      padding: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #e0f7fa, #f9f9f9);
       display: flex;
-      justify-content: center;
       align-items: center;
+      justify-content: center;
       height: 100vh;
     }
     .container {
       background: white;
       padding: 30px;
-      border-radius: 15px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      border-radius: 20px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
       text-align: center;
       width: 90%;
-      max-width: 400px;
-      opacity: 0;
-      transform: scale(0.9);
-      transition: all 0.4s ease;
+      max-width: 450px;
     }
-    .container.show {
-      opacity: 1;
-      transform: scale(1);
-    }
-    h1 {
-      margin-bottom: 20px;
-      color: #333;
-    }
+    h2 { color: #222; margin-bottom: 25px; }
     input {
-      width: 80%;
-      padding: 10px;
-      margin: 10px 0;
-      font-size: 16px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
+      padding: 12px; width: 85%; margin: 10px 0;
+      border-radius: 10px; border: 1px solid #ccc; font-size: 16px;
     }
     button {
-      padding: 12px 20px;
-      border: none;
-      border-radius: 8px;
-      font-size: 16px;
-      color: white;
-      background-color: #2196F3;
-      cursor: pointer;
-      transition: background 0.3s;
+      border: none; border-radius: 10px; padding: 15px; margin: 10px;
+      font-size: 16px; transition: all 0.3s ease; cursor: pointer;
     }
-    button:hover {
-      background-color: #1976D2;
+    #loginBtn { width: 100%; background: #0078d7; color: white; }
+    #loginBtn:hover { background: #005fa3; }
+    .switch-grid {
+      display: grid; grid-template-columns: repeat(2, 1fr);
+      gap: 15px; margin-bottom: 15px;
     }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 15px;
-      margin-top: 20px;
+    .switch-btn {
+      background: #f44336; color: white; font-weight: bold;
+      border-radius: 15px; height: 60px; font-size: 18px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     }
-    .toggle {
-      position: relative;
-      width: 100%;
-      height: 50px;
-      background-color: #f44336;
-      border-radius: 30px;
-      cursor: pointer;
-      transition: background 0.3s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-size: 18px;
+    .switch-btn.on {
+      background: #4CAF50;
+      box-shadow: 0 4px 12px rgba(76,175,80,0.5);
     }
-    .toggle.on {
-      background-color: #4CAF50;
-    }
-    .actions {
-      margin-top: 20px;
-    }
-    .actions button {
-      background-color: #2196F3;
-      margin: 5px;
-    }
-    @media (max-width: 600px) {
-      .grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
+    .action-btn { background: #0078d7; color: white; width: 45%; }
+    .logout-btn { background: #555; color: white; width: 100%; margin-top: 10px; }
+    #loginStatus { color: red; font-size: 14px; height: 20px; }
   </style>
 </head>
 <body>
-
-  <!-- Login Page -->
-  <div class="container show" id="login">
-    <h1>Parashar Home Login</h1>
-    <input type="text" id="username" placeholder="Username"><br>
-    <input type="password" id="password" placeholder="Password"><br>
+  <div class="container" id="loginPage">
+    <h2>Login</h2>
+    <input type="text" id="username" placeholder="Username" required /><br />
+    <input type="password" id="password" placeholder="Password" required /><br />
     <button id="loginBtn">Login</button>
+    <div id="loginStatus"></div>
   </div>
 
-  <!-- Main Switch Control Page -->
-  <div class="container" id="main" style="display:none;">
-    <h1>Parashar Home Switch Control</h1>
-    <div class="grid">
-      <div class="toggle" id="btn1" onclick="toggleSwitch(1)">Switch 1: OFF</div>
-      <div class="toggle" id="btn2" onclick="toggleSwitch(2)">Switch 2: OFF</div>
-      <div class="toggle" id="btn3" onclick="toggleSwitch(3)">Switch 3: OFF</div>
-      <div class="toggle" id="btn4" onclick="toggleSwitch(4)">Switch 4: OFF</div>
+  <div class="container" id="controlPage" style="display:none;">
+    <h2>Parashar Home Switch Control</h2>
+    <div class="switch-grid">
+      <button class="switch-btn" id="btn1" onclick="toggleSwitch(1)">Switch 1</button>
+      <button class="switch-btn" id="btn2" onclick="toggleSwitch(2)">Switch 2</button>
+      <button class="switch-btn" id="btn3" onclick="toggleSwitch(3)">Switch 3</button>
+      <button class="switch-btn" id="btn4" onclick="toggleSwitch(4)">Switch 4</button>
     </div>
-    <div class="actions">
-      <button onclick="setAll(0)">All ON</button>
-      <button onclick="setAll(1)">All OFF</button>
+    <div>
+      <button class="action-btn" onclick="allOn()">All ON</button>
+      <button class="action-btn" onclick="allOff()">All OFF</button>
     </div>
+    <button class="logout-btn" onclick="logout()">Logout</button>
   </div>
 
   <script>
-    const workerURL = "https://nodemcubittu.psdutta426.workers.dev"; // your Cloudflare Worker URL
-    let apiPassword = "";
-
-    // Fade in animation on load
-    window.onload = () => {
-      document.querySelector(".container").classList.add("show");
-    };
-
-    // Allow Enter key to trigger login
-    document.addEventListener("keypress", (e) => {
-      if (e.key === "Enter" && document.getElementById("login").style.display !== "none") {
-        login();
-      }
-    });
+    const workerURL = "https://nodemcubittu.psdutta426.workers.dev";
+    let username = "", password = "", refreshInterval;
 
     document.getElementById("loginBtn").addEventListener("click", login);
+    document.addEventListener("keypress", e => {
+      if (e.key === "Enter" && document.getElementById("loginPage").style.display !== "none") login();
+    });
 
     async function login() {
-      const user = document.getElementById("username").value.trim();
-      const pass = document.getElementById("password").value.trim();
+      username = document.getElementById("username").value.trim();
+      password = document.getElementById("password").value.trim();
 
-      if (!user || !pass) return alert("Please enter both fields.");
+      if (!username || !password) {
+        document.getElementById("loginStatus").textContent = "Enter username & password.";
+        return;
+      }
 
       try {
-        const res = await fetch(`${workerURL}/auth?username=${encodeURIComponent(user)}&password=${encodeURIComponent(pass)}`);
+        const res = await fetch(`${workerURL}/auth?username=${username}&password=${password}`);
         const text = await res.text();
-
-        if (text.trim() === "OK") {
-          apiPassword = pass;
-          document.getElementById("login").style.display = "none";
-          const main = document.getElementById("main");
-          main.style.display = "block";
-          setTimeout(() => main.classList.add("show"), 100);
+        if (text === "OK") {
+          document.getElementById("loginPage").style.display = "none";
+          document.getElementById("controlPage").style.display = "block";
+          loadStatus();
+          refreshInterval = setInterval(loadStatus, 5000); // auto-refresh every 5s
         } else {
-          alert("Invalid username or password");
+          document.getElementById("loginStatus").textContent = "Login failed.";
         }
-      } catch (err) {
-        alert("Login failed: network or server issue");
+      } catch {
+        document.getElementById("loginStatus").textContent = "Network or server issue.";
+      }
+    }
+
+    async function loadStatus() {
+      for (let i = 1; i <= 4; i++) {
+        const btn = document.getElementById(`btn${i}`);
+        try {
+          const res = await fetch(`${workerURL}/get?pin=v${i}&password=${password}`);
+          const val = await res.text();
+          const isOn = val.trim() === "0";
+          btn.classList.toggle("on", isOn);
+          btn.textContent = `Switch ${i}: ${isOn ? "ON" : "OFF"}`;
+        } catch {
+          btn.textContent = `Switch ${i}: ?`;
+        }
       }
     }
 
     async function toggleSwitch(num) {
-      const btn = document.getElementById("btn" + num);
+      const btn = document.getElementById(`btn${num}`);
       const isOn = btn.classList.contains("on");
-      const value = isOn ? 1 : 0; // 0 = ON, 1 = OFF
-      const pin = "v" + num;
+      const newValue = isOn ? 1 : 0;
 
       try {
-        const res = await fetch(`${workerURL}/update?pin=${pin}&value=${value}&password=${encodeURIComponent(apiPassword)}`);
-        if (res.ok) {
-          btn.classList.toggle("on", !isOn);
-          btn.textContent = `Switch ${num}: ${isOn ? "OFF" : "ON"}`;
-        } else {
-          alert("Error: Unauthorized or network issue");
-        }
+        await fetch(`${workerURL}/update?pin=v${num}&value=${newValue}&password=${password}`);
+        btn.classList.toggle("on");
+        btn.textContent = `Switch ${num}: ${!isOn ? "ON" : "OFF"}`;
       } catch {
-        alert("Error connecting to Worker");
+        alert("Network issue while toggling.");
       }
     }
 
-    async function setAll(value) {
+    async function allOn() {
       for (let i = 1; i <= 4; i++) {
-        try {
-          await fetch(`${workerURL}/update?pin=v${i}&value=${value}&password=${encodeURIComponent(apiPassword)}`);
-          const btn = document.getElementById("btn" + i);
-          const isOn = value === 0;
-          btn.classList.toggle("on", isOn);
-          btn.textContent = `Switch ${i}: ${isOn ? "ON" : "OFF"}`;
-        } catch {
-          console.log("Error setting switch " + i);
-        }
+        await fetch(`${workerURL}/update?pin=v${i}&value=0&password=${password}`);
+        const btn = document.getElementById(`btn${i}`);
+        btn.classList.add("on");
+        btn.textContent = `Switch ${i}: ON`;
       }
+    }
+
+    async function allOff() {
+      for (let i = 1; i <= 4; i++) {
+        await fetch(`${workerURL}/update?pin=v${i}&value=1&password=${password}`);
+        const btn = document.getElementById(`btn${i}`);
+        btn.classList.remove("on");
+        btn.textContent = `Switch ${i}: OFF`;
+      }
+    }
+
+    function logout() {
+      clearInterval(refreshInterval);
+      document.getElementById("controlPage").style.display = "none";
+      document.getElementById("loginPage").style.display = "block";
+      username = ""; password = "";
     }
   </script>
-
 </body>
 </html>
