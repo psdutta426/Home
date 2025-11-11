@@ -345,7 +345,7 @@ async function bulkUpdateSequential(turnOn) {
       btn.classList.toggle("on", turnOn);
       btn.textContent = `${sw.name}: ${turnOn ? "ON" : "OFF"}`;
 
-      await new Promise(r => setTimeout(r, 150));
+      await new Promise(r => setTimeout(r, 80));
     } catch (err) {
       console.error("Failed:", sw.pin);
     }
@@ -367,3 +367,4 @@ function logout() {
 </script>
 </body>
 </html>
+
