@@ -32,8 +32,10 @@
       transition: opacity 0.6s ease, transform 0.6s ease;
       z-index: 1;
     }
-
-    .show { opacity: 1; transform: translateY(0); }
+    .show {
+      opacity: 1;
+      transform: translateY(0);
+    }
 
     .container::before {
       content: "";
@@ -46,35 +48,50 @@
     }
 
     h2 { color: #111; margin-bottom: 25px; font-weight: 600; }
+
     input {
       padding: 12px; width: 85%; margin: 10px 0;
       border-radius: 10px; border: 1px solid #ccc; font-size: 16px;
     }
 
     button {
-      border: none; border-radius: 10px; padding: 15px;
-      margin: 10px; font-size: 16px;
-      transition: all 0.3s ease; cursor: pointer;
+      border: none; border-radius: 10px; padding: 15px; margin: 10px;
+      font-size: 16px; transition: all 0.3s ease; cursor: pointer;
     }
 
     #loginBtn { width: 100%; background: #0078d7; color: white; }
     #loginBtn:hover { background: #005fa3; }
+
+    label {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 14px;
+      color: #333;
+      cursor: pointer;
+      user-select: none;
+    }
+    input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+    }
 
     .switch-grid {
       display: grid; grid-template-columns: repeat(2, 1fr);
       gap: 15px; margin-bottom: 15px;
     }
 
-    .switch-grid .switch-btn:nth-child(5) { grid-column: 1 / -1; }
+    .switch-grid .switch-btn:nth-child(5) {
+      grid-column: 1 / -1;
+    }
 
     .switch-btn {
-      background: #f44336;
-      color: white;
-      font-weight: bold;
-      border-radius: 15px;
-      height: 60px;
-      font-size: 16px;
+      background: #f44336; color: white; font-weight: bold;
+      border-radius: 15px; height: 60px; font-size: 16px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
     }
 
     .switch-btn.on {
@@ -82,36 +99,36 @@
       box-shadow: 0 4px 12px rgba(76,175,80,0.5);
     }
 
-    .action-btn {
-      background: #0078d7;
-      color: white;
-      width: 45%;
-    }
+    .action-btn { background: #0078d7; color: white; width: 45%; }
+    .logout-btn { background: #555; color: white; width: 100%; margin-top: 10px; }
+    #loginStatus { color: red; font-size: 14px; height: 20px; }
 
-    .logout-btn {
-      background: #555;
-      color: white;
-      width: 100%;
-      margin-top: 10px;
-    }
-
-    #loginStatus { color: red; height: 20px; font-size: 14px; }
-
-    /* Loading Screen */
     #loadingScreen {
-      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-      display: flex; align-items: center; justify-content: center;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       flex-direction: column;
       background: rgba(255, 255, 255, 0.95);
-      font-size: 18px; color: #333;
+      font-size: 18px;
+      color: #333;
       z-index: 999;
-      opacity: 0; pointer-events: none;
+      opacity: 0;
+      pointer-events: none;
       transition: opacity 0.5s ease;
     }
-    #loadingScreen.show { opacity: 1; pointer-events: all; }
+    #loadingScreen.show {
+      opacity: 1;
+      pointer-events: all;
+    }
+    #loadingMessage {
+      text-align: center;
+    }
 
     .spinner {
-      width: 30px; height: 30px;
+      width: 30px;
+      height: 30px;
       border: 3px solid #ccc;
       border-top-color: #0078d7;
       border-radius: 50%;
@@ -124,185 +141,229 @@
 
 <body>
 
-  <!-- LOADING SCREEN -->
+  <!---------------- LOADING SCREEN ---------------->
   <div id="loadingScreen">
     <div class="spinner"></div>
-    <div>Checking session…</div>
+    <div id="loadingMessage">Checking saved session…</div>
   </div>
 
-  <!-- LOGIN PAGE -->
+  <!---------------- LOGIN PAGE ---------------->
   <div class="container" id="loginPage">
     <h2>Login</h2>
-    <input type="text" id="username" placeholder="Username" />
-    <input type="password" id="password" placeholder="Password" />
+    <input type="text" id="username" placeholder="Username" required /><br />
+    <input type="password" id="password" placeholder="Password" required /><br />
     <label><input type="checkbox" id="rememberMe"> Remember Me</label>
     <button id="loginBtn">Login</button>
     <div id="loginStatus"></div>
   </div>
 
-  <!-- CONTROL PANEL -->
+  <!---------------- CONTROL PAGE ---------------->
   <div class="container" id="controlPage" style="display:none;">
-    <h2>Home Switch Control</h2>
+    <h2>Parashar's Home Switch Control</h2>
 
     <div class="switch-grid">
-      <button id="btn0" class="switch-btn" onclick="toggleSwitch(0)">Backup</button>
-      <button id="btn1" class="switch-btn" onclick="toggleSwitch(1)">Tubelight</button>
-      <button id="btn2" class="switch-btn" onclick="toggleSwitch(2)">Fan</button>
-      <button id="btn3" class="switch-btn" onclick="toggleSwitch(3)">Bulb</button>
-      <button id="btn4" class="switch-btn" onclick="toggleSwitch(4)">Plug</button>
+      <button class="switch-btn" id="btn0" onclick="toggleSwitch(0)">Backup</button>
+      <button class="switch-btn" id="btn1" onclick="toggleSwitch(1)">Tubelight</button>
+      <button class="switch-btn" id="btn2" onclick="toggleSwitch(2)">Fan</button>
+      <button class="switch-btn" id="btn3" onclick="toggleSwitch(3)">Bulb</button>
+      <button class="switch-btn" id="btn4" onclick="toggleSwitch(4)">Plug</button>
     </div>
 
-    <button class="action-btn" onclick="bulkUpdate('allOn', true)">All ON</button>
-    <button class="action-btn" onclick="bulkUpdate('allOff', false)">All OFF</button>
+    <div>
+      <button class="action-btn" onclick="bulkUpdateSequential(true)">All ON</button>
+      <button class="action-btn" onclick="bulkUpdateSequential(false)">All OFF</button>
+    </div>
+
     <button class="logout-btn" onclick="logout()">Logout</button>
   </div>
 
-  <script>
-    const workerURL = "https://nodemcubittu.psdutta426.workers.dev";
+<script>
+/* ---------------- CONFIG ---------------- */
+const workerURL = "https://nodemcubittu.psdutta426.workers.dev";
+let authToken = null;
+let refreshInterval;
 
-    let authToken = null;
-    let refreshInterval;
+const switches = [
+  { id: "btn0", name: "Backup", pin: "v1" },
+  { id: "btn1", name: "Tubelight", pin: "v2" },
+  { id: "btn2", name: "Fan", pin: "v3" },
+  { id: "btn3", name: "Bulb", pin: "v4" },
+  { id: "btn4", name: "Plug", pin: "v5" }
+];
 
-    const switches = [
-      { id: "btn0", name: "Backup", pin: "v1" },
-      { id: "btn1", name: "Tubelight", pin: "v2" },
-      { id: "btn2", name: "Fan", pin: "v3" },
-      { id: "btn3", name: "Bulb", pin: "v4" },
-      { id: "btn4", name: "Plug", pin: "v5" }
-    ];
+const loginBtn = document.getElementById("loginBtn");
+const usernameInput = document.getElementById("username");
+const passwordInput = document.getElementById("password");
+const loadingScreen = document.getElementById("loadingScreen");
+const loginStatus = document.getElementById("loginStatus");
 
-    const loginBtn = document.getElementById("loginBtn");
-    loginBtn.onclick = login;
+/* ---------------- EVENT LISTENERS ---------------- */
+loginBtn.addEventListener("click", login);
+usernameInput.addEventListener("keypress", e => {
+  if (e.key === "Enter") passwordInput.focus();
+});
+passwordInput.addEventListener("keypress", e => {
+  if (e.key === "Enter") login();
+});
 
-    window.onload = autoLogin;
+window.addEventListener("load", autoLogin);
 
-    /** AUTO LOGIN */
-    async function autoLogin() {
-      document.getElementById("loadingScreen").classList.add("show");
+/* ---------------- FETCH WITH AUTH ---------------- */
+async function fetchWithAuth(url, options = {}) {
+  const headers = new Headers(options.headers || {});
+  if (authToken) headers.append("Authorization", `Bearer ${authToken}`);
 
-      const saved = localStorage.getItem("authToken");
-      if (saved) {
-        authToken = saved;
-        try {
-          await fetchWithAuth(`${workerURL}/status`);
-          showControlPanel();
-          return;
-        } catch {}
-      }
+  const res = await fetch(url, { ...options, headers });
 
-      setTimeout(() => {
-        document.getElementById("loadingScreen").classList.remove("show");
-        document.getElementById("loginPage").classList.add("show");
-      }, 500);
+  if (!res.ok) {
+    if (res.status === 401) {
+      alert("Session expired. Please login again.");
+      logout();
+      throw new Error("Auth failed");
     }
+    throw new Error("Network error");
+  }
+  return res;
+}
 
-    /** FETCH WITH AUTH */
-    async function fetchWithAuth(url, options = {}) {
-      const headers = options.headers || {};
-      if (authToken) headers["Authorization"] = `Bearer ${authToken}`;
-      return fetch(url, { ...options, headers });
+/* ---------------- AUTO LOGIN ---------------- */
+async function autoLogin() {
+  loadingScreen.classList.add("show");
+  const saved = localStorage.getItem("authToken");
+
+  if (saved) {
+    authToken = saved;
+    try {
+      await fetchWithAuth(`${workerURL}/status`);
+      showControl();
+      return;
+    } catch {
+      localStorage.removeItem("authToken");
     }
+  }
 
-    /** LOGIN */
-    async function login() {
-      const usernameVal = document.getElementById("username").value.trim();
-      const passwordVal = document.getElementById("password").value.trim();
-      const remember = document.getElementById("rememberMe").checked;
+  setTimeout(() => {
+    loadingScreen.classList.remove("show");
+    document.getElementById("loginPage").classList.add("show");
+  }, 500);
+}
 
-      const res = await fetch(`${workerURL}/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username: usernameVal, password: passwordVal })
-      });
+/* ---------------- LOGIN ---------------- */
+async function login() {
+  const usernameVal = usernameInput.value.trim();
+  const passwordVal = passwordInput.value.trim();
+  const remember = document.getElementById("rememberMe").checked;
 
-      if (!res.ok) {
-        document.getElementById("loginStatus").innerText = "Invalid login.";
-        return;
-      }
+  if (!usernameVal || !passwordVal) {
+    loginStatus.textContent = "Enter username & password.";
+    return;
+  }
 
-      const data = await res.json();
-      authToken = data.token;
+  try {
+    const res = await fetch(`${workerURL}/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username: usernameVal, password: passwordVal })
+    });
 
-      if (remember) localStorage.setItem("authToken", authToken);
+    if (!res.ok) throw new Error();
 
-      showControlPanel();
-    }
+    const data = await res.json();
+    authToken = data.token;
+    if (remember) localStorage.setItem("authToken", authToken);
 
-    /** SHOW CONTROL PANEL */
-    function showControlPanel() {
-      document.getElementById("loginPage").style.display = "none";
-      const panel = document.getElementById("controlPage");
-      panel.style.display = "block";
-      setTimeout(() => panel.classList.add("show"), 50);
+    showControl();
+  } catch {
+    loginStatus.textContent = "Invalid login.";
+  }
+}
 
-      loadStatus();
-      refreshInterval = setInterval(loadStatus, 2000);
-    }
+/* ---------------- SHOW CONTROL PANEL ---------------- */
+function showControl() {
+  document.getElementById("loginPage").style.display = "none";
+  const panel = document.getElementById("controlPage");
+  panel.style.display = "block";
+  setTimeout(() => panel.classList.add("show"), 50);
 
-    /** LOAD STATUS */
-    async function loadStatus() {
-      try {
-        const r = await fetchWithAuth(`${workerURL}/status`);
-        const status = await r.json();
+  loadStatus();
+  refreshInterval = setInterval(loadStatus, 2000);
+}
 
-        switches.forEach(sw => {
-          const btn = document.getElementById(sw.id);
-          const v = status[sw.pin];
-          const isOn = v === "0";
+/* ---------------- LOAD SWITCH STATUS ---------------- */
+async function loadStatus() {
+  try {
+    const res = await fetchWithAuth(`${workerURL}/status`);
+    const status = await res.json();
 
-          btn.classList.toggle("on", isOn);
-          btn.textContent = `${sw.name}: ${isOn ? "ON" : "OFF"}`;
-        });
-      } catch {}
-    }
-
-    /** TOGGLE SINGLE SWITCH */
-    async function toggleSwitch(i) {
-      const sw = switches[i];
+    switches.forEach(sw => {
       const btn = document.getElementById(sw.id);
-      const currentlyOn = btn.classList.contains("on");
-      const value = currentlyOn ? "1" : "0";
+      const isOn = status[sw.pin] === "0";
 
-      btn.classList.toggle("on", !currentlyOn);
-      btn.textContent = `${sw.name}: ${!currentlyOn ? "ON" : "OFF"}`;
+      btn.classList.toggle("on", isOn);
+      btn.textContent = `${sw.name}: ${isOn ? "ON" : "OFF"}`;
+    });
 
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+/* ---------------- TOGGLE A SWITCH ---------------- */
+async function toggleSwitch(index) {
+  const sw = switches[index];
+  const btn = document.getElementById(sw.id);
+
+  const wasOn = btn.classList.contains("on");
+  const newVal = wasOn ? "1" : "0";
+
+  btn.classList.toggle("on", !wasOn);
+  btn.textContent = `${sw.name}: ${!wasOn ? "ON" : "OFF"}`;
+
+  try {
+    await fetchWithAuth(`${workerURL}/update`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ pin: sw.pin, value: newVal })
+    });
+  } catch {
+    btn.classList.toggle("on", wasOn);
+    btn.textContent = `${sw.name}: ${wasOn ? "ON" : "OFF"}`;
+  }
+}
+
+/* ---------------- SEQUENTIAL ALL ON/OFF ---------------- */
+async function bulkUpdateSequential(turnOn) {
+  for (const sw of switches) {
+    try {
       await fetchWithAuth(`${workerURL}/update`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ pin: sw.pin, value })
-      });
-    }
-
-    /** BULK UPDATE FIXED VERSION */
-    async function bulkUpdate(action, optimisticState) {
-      // UI Update
-      switches.forEach(sw => {
-        const btn = document.getElementById(sw.id);
-        btn.classList.toggle("on", optimisticState);
-        btn.textContent = `${sw.name}: ${optimisticState ? "ON" : "OFF"}`;
+        body: JSON.stringify({ pin: sw.pin, value: turnOn ? "0" : "1" })
       });
 
-      try {
-        await fetchWithAuth(`${workerURL}/${action}`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: "{}"
-        });
-      } catch {
-        alert("Bulk update failed");
-        loadStatus();
-      }
+      const btn = document.getElementById(sw.id);
+      btn.classList.toggle("on", turnOn);
+      btn.textContent = `${sw.name}: ${turnOn ? "ON" : "OFF"}`;
+
+      await new Promise(r => setTimeout(r, 150));
+    } catch (err) {
+      console.error("Failed:", sw.pin);
     }
+  }
+}
 
-    function logout() {
-      clearInterval(refreshInterval);
-      authToken = null;
-      localStorage.removeItem("authToken");
+/* ---------------- LOGOUT ---------------- */
+function logout() {
+  clearInterval(refreshInterval);
+  localStorage.removeItem("authToken");
+  authToken = null;
 
-      document.getElementById("controlPage").style.display = "none";
-      document.getElementById("loginPage").style.display = "block";
-    }
-  </script>
+  document.getElementById("controlPage").style.display = "none";
+  const loginPage = document.getElementById("loginPage");
+  loginPage.style.display = "block";
+  setTimeout(() => loginPage.classList.add("show"), 50);
+}
 
+</script>
 </body>
 </html>
