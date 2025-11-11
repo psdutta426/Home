@@ -18,6 +18,7 @@
     }
 
     .container {
+      position: relative;
       width: 90%;
       max-width: 450px;
       padding: 30px;
@@ -29,8 +30,20 @@
       opacity: 0;
       transform: translateY(20px);
       transition: opacity 0.6s ease, transform 0.6s ease;
+      z-index: 1;
     }
+
     .show { opacity: 1; transform: translateY(0); }
+
+    .container::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: url('https://raw.githubusercontent.com/psdutta426/Home/main/TheMathClassroom.jpg')
+        no-repeat center center/cover;
+      opacity: 0.25;
+      z-index: -1;
+    }
 
     h2 { color: #111; margin-bottom: 25px; font-weight: 600; }
     input {
@@ -39,8 +52,9 @@
     }
 
     button {
-      border: none; border-radius: 10px; padding: 15px; margin: 10px;
-      font-size: 16px; cursor: pointer; transition: all 0.3s ease;
+      border: none; border-radius: 10px; padding: 15px;
+      margin: 10px; font-size: 16px;
+      transition: all 0.3s ease; cursor: pointer;
     }
 
     #loginBtn { width: 100%; background: #0078d7; color: white; }
@@ -51,24 +65,70 @@
       gap: 15px; margin-bottom: 15px;
     }
 
+    .switch-grid .switch-btn:nth-child(5) { grid-column: 1 / -1; }
+
     .switch-btn {
-      background: #f44336; color: white; font-weight: bold;
-      border-radius: 15px; height: 60px; font-size: 16px;
+      background: #f44336;
+      color: white;
+      font-weight: bold;
+      border-radius: 15px;
+      height: 60px;
+      font-size: 16px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     }
+
     .switch-btn.on {
-      background: #4caf50;
+      background: #4CAF50;
       box-shadow: 0 4px 12px rgba(76,175,80,0.5);
     }
 
-    .action-btn { background: #0078d7; color: white; width: 45%; }
-    .logout-btn { background: #555; color: white; width: 100%; margin-top: 10px; }
+    .action-btn {
+      background: #0078d7;
+      color: white;
+      width: 45%;
+    }
 
-    #loginStatus { color: red; font-size: 14px; height: 20px; }
+    .logout-btn {
+      background: #555;
+      color: white;
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    #loginStatus { color: red; height: 20px; font-size: 14px; }
+
+    /* Loading Screen */
+    #loadingScreen {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      display: flex; align-items: center; justify-content: center;
+      flex-direction: column;
+      background: rgba(255, 255, 255, 0.95);
+      font-size: 18px; color: #333;
+      z-index: 999;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.5s ease;
+    }
+    #loadingScreen.show { opacity: 1; pointer-events: all; }
+
+    .spinner {
+      width: 30px; height: 30px;
+      border: 3px solid #ccc;
+      border-top-color: #0078d7;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 12px;
+    }
+    @keyframes spin { 100% { transform: rotate(360deg); } }
   </style>
 </head>
 
 <body>
+
+  <!-- LOADING SCREEN -->
+  <div id="loadingScreen">
+    <div class="spinner"></div>
+    <div>Checking session…</div>
+  </div>
 
   <!-- LOGIN PAGE -->
   <div class="container" id="loginPage">
@@ -80,160 +140,169 @@
     <div id="loginStatus"></div>
   </div>
 
-  <!-- CONTROL PAGE -->
+  <!-- CONTROL PANEL -->
   <div class="container" id="controlPage" style="display:none;">
-    <h2>Parashar's Home Switch Control</h2>
+    <h2>Home Switch Control</h2>
 
     <div class="switch-grid">
-      <button class="switch-btn" id="btn0" onclick="toggleSwitch(0)">Backup</button>
-      <button class="switch-btn" id="btn1" onclick="toggleSwitch(1)">Tubelight</button>
-      <button class="switch-btn" id="btn2" onclick="toggleSwitch(2)">Fan</button>
-      <button class="switch-btn" id="btn3" onclick="toggleSwitch(3)">Bulb</button>
-      <button class="switch-btn" id="btn4" onclick="toggleSwitch(4)">Plug</button>
+      <button id="btn0" class="switch-btn" onclick="toggleSwitch(0)">Backup</button>
+      <button id="btn1" class="switch-btn" onclick="toggleSwitch(1)">Tubelight</button>
+      <button id="btn2" class="switch-btn" onclick="toggleSwitch(2)">Fan</button>
+      <button id="btn3" class="switch-btn" onclick="toggleSwitch(3)">Bulb</button>
+      <button id="btn4" class="switch-btn" onclick="toggleSwitch(4)">Plug</button>
     </div>
 
-    <!-- ✅ FIXED BUTTONS / DIRECT BULK CALL -->
-    <div>
-      <button class="action-btn" onclick="bulkUpdate('allOn', true)">All ON</button>
-      <button class="action-btn" onclick="bulkUpdate('allOff', false)">All OFF</button>
-    </div>
-
+    <button class="action-btn" onclick="bulkUpdate('allOn', true)">All ON</button>
+    <button class="action-btn" onclick="bulkUpdate('allOff', false)">All OFF</button>
     <button class="logout-btn" onclick="logout()">Logout</button>
   </div>
 
-<script>
-const workerURL = "https://nodemcubittu.psdutta426.workers.dev";
-let authToken = null;
-let refreshInterval;
+  <script>
+    const workerURL = "https://nodemcubittu.psdutta426.workers.dev";
 
-const switches = [
-  { id: "btn0", name: "Backup", pin: "v1" },
-  { id: "btn1", name: "Tubelight", pin: "v2" },
-  { id: "btn2", name: "Fan", pin: "v3" },
-  { id: "btn3", name: "Bulb", pin: "v4" },
-  { id: "btn4", name: "Plug", pin: "v5" },
-];
+    let authToken = null;
+    let refreshInterval;
 
-// ✅ FETCH WITH AUTH
-async function fetchWithAuth(url, options = {}) {
-  const headers = new Headers(options.headers || {});
-  headers.append("Authorization", `Bearer ${authToken}`);
+    const switches = [
+      { id: "btn0", name: "Backup", pin: "v1" },
+      { id: "btn1", name: "Tubelight", pin: "v2" },
+      { id: "btn2", name: "Fan", pin: "v3" },
+      { id: "btn3", name: "Bulb", pin: "v4" },
+      { id: "btn4", name: "Plug", pin: "v5" }
+    ];
 
-  const response = await fetch(url, { ...options, headers });
-  if (!response.ok) throw new Error("Auth or Network Error");
-  return response;
-}
+    const loginBtn = document.getElementById("loginBtn");
+    loginBtn.onclick = login;
 
-// ✅ LOGIN
-document.getElementById("loginBtn").onclick = login;
-document.getElementById("password").addEventListener("keypress", e => {
-  if (e.key === "Enter") login();
-});
+    window.onload = autoLogin;
 
-async function login() {
-  const username = username.value.trim();
-  const password = document.getElementById("password").value.trim();
-  const remember = document.getElementById("rememberMe").checked;
+    /** AUTO LOGIN */
+    async function autoLogin() {
+      document.getElementById("loadingScreen").classList.add("show");
 
-  const res = await fetch(`${workerURL}/login`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username, password })
-  });
+      const saved = localStorage.getItem("authToken");
+      if (saved) {
+        authToken = saved;
+        try {
+          await fetchWithAuth(`${workerURL}/status`);
+          showControlPanel();
+          return;
+        } catch {}
+      }
 
-  if (!res.ok) {
-    loginStatus.textContent = "Invalid login.";
-    return;
-  }
+      setTimeout(() => {
+        document.getElementById("loadingScreen").classList.remove("show");
+        document.getElementById("loginPage").classList.add("show");
+      }, 500);
+    }
 
-  const data = await res.json();
-  authToken = data.token;
+    /** FETCH WITH AUTH */
+    async function fetchWithAuth(url, options = {}) {
+      const headers = options.headers || {};
+      if (authToken) headers["Authorization"] = `Bearer ${authToken}`;
+      return fetch(url, { ...options, headers });
+    }
 
-  if (remember) localStorage.setItem("authToken", authToken);
+    /** LOGIN */
+    async function login() {
+      const usernameVal = document.getElementById("username").value.trim();
+      const passwordVal = document.getElementById("password").value.trim();
+      const remember = document.getElementById("rememberMe").checked;
 
-  showControl();
-}
+      const res = await fetch(`${workerURL}/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: usernameVal, password: passwordVal })
+      });
 
-// ✅ SHOW CONTROL PAGE
-function showControl() {
-  loginPage.style.display = "none";
-  controlPage.style.display = "block";
+      if (!res.ok) {
+        document.getElementById("loginStatus").innerText = "Invalid login.";
+        return;
+      }
 
-  loadStatus();
-  refreshInterval = setInterval(loadStatus, 2000);
-}
+      const data = await res.json();
+      authToken = data.token;
 
-// ✅ LOAD STATUS FOR ALL 5 SWITCHES
-async function loadStatus() {
-  try {
-    const res = await fetchWithAuth(`${workerURL}/status`);
-    const status = await res.json();
+      if (remember) localStorage.setItem("authToken", authToken);
 
-    switches.forEach(sw => {
+      showControlPanel();
+    }
+
+    /** SHOW CONTROL PANEL */
+    function showControlPanel() {
+      document.getElementById("loginPage").style.display = "none";
+      const panel = document.getElementById("controlPage");
+      panel.style.display = "block";
+      setTimeout(() => panel.classList.add("show"), 50);
+
+      loadStatus();
+      refreshInterval = setInterval(loadStatus, 2000);
+    }
+
+    /** LOAD STATUS */
+    async function loadStatus() {
+      try {
+        const r = await fetchWithAuth(`${workerURL}/status`);
+        const status = await r.json();
+
+        switches.forEach(sw => {
+          const btn = document.getElementById(sw.id);
+          const v = status[sw.pin];
+          const isOn = v === "0";
+
+          btn.classList.toggle("on", isOn);
+          btn.textContent = `${sw.name}: ${isOn ? "ON" : "OFF"}`;
+        });
+      } catch {}
+    }
+
+    /** TOGGLE SINGLE SWITCH */
+    async function toggleSwitch(i) {
+      const sw = switches[i];
       const btn = document.getElementById(sw.id);
-      const on = status[sw.pin] === "0";
+      const currentlyOn = btn.classList.contains("on");
+      const value = currentlyOn ? "1" : "0";
 
-      btn.classList.toggle("on", on);
-      btn.textContent = `${sw.name}: ${on ? "ON" : "OFF"}`;
-    });
+      btn.classList.toggle("on", !currentlyOn);
+      btn.textContent = `${sw.name}: ${!currentlyOn ? "ON" : "OFF"}`;
 
-  } catch {
-    console.log("Status load failed");
-  }
-}
+      await fetchWithAuth(`${workerURL}/update`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pin: sw.pin, value })
+      });
+    }
 
-// ✅ TOGGLE SINGLE SWITCH
-async function toggleSwitch(index) {
-  const sw = switches[index];
-  const btn = document.getElementById(sw.id);
-  const isOn = btn.classList.contains("on");
-  const newVal = isOn ? "1" : "0";
+    /** BULK UPDATE FIXED VERSION */
+    async function bulkUpdate(action, optimisticState) {
+      // UI Update
+      switches.forEach(sw => {
+        const btn = document.getElementById(sw.id);
+        btn.classList.toggle("on", optimisticState);
+        btn.textContent = `${sw.name}: ${optimisticState ? "ON" : "OFF"}`;
+      });
 
-  btn.classList.toggle("on", !isOn);
-  btn.textContent = `${sw.name}: ${!isOn ? "ON" : "OFF"}`;
+      try {
+        await fetchWithAuth(`${workerURL}/${action}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: "{}"
+        });
+      } catch {
+        alert("Bulk update failed");
+        loadStatus();
+      }
+    }
 
-  try {
-    await fetchWithAuth(`${workerURL}/update`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ pin: sw.pin, value: newVal })
-    });
-  } catch {
-    alert("Failed to update switch.");
-  }
-}
+    function logout() {
+      clearInterval(refreshInterval);
+      authToken = null;
+      localStorage.removeItem("authToken");
 
-// ✅ ✅ FIXED BULK UPDATE — ALWAYS WORKS FOR ALL 5 ✅ ✅
-async function bulkUpdate(action, state) {
-
-  // optimistic UI
-  switches.forEach(sw => {
-    const btn = document.getElementById(sw.id);
-    btn.classList.toggle("on", state);
-    btn.textContent = `${sw.name}: ${state ? "ON" : "OFF"}`;
-  });
-
-  try {
-    await fetch(`${workerURL}/${action}`, {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${authToken}`,
-        "Content-Type": "application/json"
-      },
-      body: "{}"   // ✅ prevents GET fallback
-    });
-  } catch {
-    alert("Bulk update failed.");
-  }
-}
-
-// ✅ LOGOUT
-function logout() {
-  clearInterval(refreshInterval);
-  localStorage.removeItem("authToken");
-  location.reload();
-}
-</script>
+      document.getElementById("controlPage").style.display = "none";
+      document.getElementById("loginPage").style.display = "block";
+    }
+  </script>
 
 </body>
 </html>
