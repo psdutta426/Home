@@ -321,37 +321,38 @@
     /**
      * Fetches the status of ALL switches in one request.
      */
-    async function loadStatus() {
-      try {
-        // **EFFICIENCY FIX:** One request for all statuses
-        const res = await fetchWithAuth(`${workerURL}/status`);
-        const status = await res.json(); // e.g., { "v1": "0", "v2": "1", ... }
+  async function loadStatus() {
+  try {
+    const res = await fetchWithAuth(`${workerURL}/status`);
+    const status = await res.json();
 
-        switches.forEach((sw, index) => {
-          const btn = document.getElementById(sw.id);
-          const pinStatus = status[sw.pin];
-          if (pinStatus === undefined) {
-            btn.textContent = `${sw.name}: ?`;
-            btn.classList.remove("on");
-            return;
-          }
-          
-          const isOn = pinStatus.trim() === "0";
-          btn.classList.toggle("on", isOn);
-          btn.textContent = `${sw.name}: ${isOn ? "ON" : "OFF"}`;
-        });
+    switches.forEach((sw, index) => {
+      const btn = document.getElementById(sw.id);
+      const pinStatus = status[sw.pin];
 
-      } catch (error) {
-        if (error.message !== "Authentication failed") {
-          // Auth failures are handled by fetchWithAuth
-          console.error("Could not load status:", error);
-          switches.forEach(sw => {
-            document.getElementById(sw.id).textContent = `${sw.name}: ?`;
-          });
-        }
+      if (pinStatus === undefined || pinStatus === null) {
+        btn.textContent = `${sw.name}: ?`;
+        btn.classList.remove("on");
+        return;
       }
-    }
 
+      // ✅ FIX: always convert to string so trim() never fails
+      const val = String(pinStatus).trim();
+      const isOn = val === "0";
+
+      btn.classList.toggle("on", isOn);
+      btn.textContent = `${sw.name}: ${isOn ? "ON" : "OFF"}`;
+    });
+
+  } catch (error) {
+    if (error.message !== "Authentication failed") {
+      console.error("Could not load status:", error);
+      switches.forEach(sw => {
+        document.getElementById(sw.id).textContent = `${sw.name}: ?`;
+      });
+    }
+  }
+}
     /**
      * Toggles a single switch.
      */
@@ -435,3 +436,4 @@
 </body>
 
 </html>
+
