@@ -312,22 +312,34 @@ async function bulkUpdateSequential(turnOn){
       const btn = document.getElementById(sw.id);
       btn.classList.toggle("on", turnOn);
       btn.textContent = `${sw.name}: ${turnOn?"ON":"OFF"}`;
-      await new Promise(r=>setTimeout(r,80));
+      await new Promise(r=>setTimeout(r,40));
     } catch(err){ console.error("Failed:", sw.pin); }
   }
 }
 
-function logout(){
+function logout() {
   clearInterval(refreshInterval);
   localStorage.removeItem("authToken");
-  authToken=null;
+  authToken = null;
 
-  document.getElementById("controlPage").style.display="none";
-  const loginPage=document.getElementById("loginPage");
-  loginPage.style.display="block";
-  setTimeout(()=>loginPage.classList.add("show"),50);
+  // Hide control panel
+  document.getElementById("controlPage").style.display = "none";
+
+  // Show login page
+  const loginPage = document.getElementById("loginPage");
+  loginPage.style.display = "block";
+  setTimeout(() => loginPage.classList.add("show"), 50);
+
+  // Clear input fields and checkbox
+  usernameInput.value = "";
+  passwordInput.value = "";
+  document.getElementById("rememberMe").checked = false;
+
+  // Clear any previous login error messages
+  loginStatus.textContent = "";
 }
 </script>
 </body>
 </html>
+
 
